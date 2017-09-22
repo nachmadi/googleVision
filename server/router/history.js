@@ -1,57 +1,25 @@
 const express = require('express')
 const router = express.Router()
+const history = require('../controller/history')
+const jwt = require('jsonwebtoken')
 
-var vision = require('@google-cloud/vision');
-
-var visionClient = vision({
-  projectId: 'first-app-178213',
-  keyFilename: '../First-App-b4d9df73301c.json'
-});
-
-const visionHelper = (req, res, next) => {
-  //add
-  var gambar = req.body.gambar
-  // var gambar = ``
-
-  // OK NOW we can use two input, pake gstorage, or pake link biasa=
-  // var gcsImageUri = 'gs://hacktivrunner/runner2.jpg';
-  var imageUri = gambar;
-  var source = {
-      // gcsImageUri : gcsImageUri
-      imageUri : imageUri
-  };
-  var image = {
-      source : source
-  };
-  var type = vision.v1.types.Feature.Type.WEB_DETECTION;
-  var featuresElement = {
-      type : type
-  };
-  var features = [featuresElement];
-  var requestsElement = {
-      image : image,
-      features : features
-  };
-  console.log('sampai sini')
-  req.vision = [requestsElement];
-  next()
+const midty = (req, res, next) => {
+  if(req.headers.hasOwnProperty('token')){
+    var decoded = jwt.verify(req.headers.token, "apaaa")
+    console.log('==============================',decoded);
+    req.headers.auth = decoded
+    console.log("=============================>", req.headers.auth);
+    next()
+  }
+  else {
+    res.send("maaf anda harus login")
+  }
 }
 
-//==========
-
-router.post('/api', visionHelper, (req, res) => {
-  visionClient.batchAnnotateImages({requests: req.vision})
-  .then(function(responses) {
-      var response = responses[0];
-      console.log(response);
-      // doThingsWith(response)
-      res.send(response.responses[0].textAnnotations[0].description)
-  })
-  .catch(function(err) {
-      console.error(err);
-  });
-})
-
+router.get('/all', history.getall)
+router.get('/', midty, history.getid)
+router.post('/', midty, history.insert)
+router.delete('/:id', midty ,history.remove)
 
 
 module.exports = router

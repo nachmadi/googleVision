@@ -1,31 +1,63 @@
-var vision = require('@google-cloud/vision');
+const db = require('../model/history')
+const FB = require('fb')
 
-var visionClient = vision({
-  projectId: 'grape-spaceship-123',
-  keyFilename: './server'
-});
+const getall = (req, res) =>{
+  db.find()
+  .then(response => {
+    res.send(response)
+  })
+  .catch(err => {
+    res.send(err)
+  })
+}
 
-var gcsImageUri = 'gs://gapic-toolkit/President_Barack_Obama.jpg';
-var source = {
-    gcsImageUri : gcsImageUri
-};
-var image = {
-    source : source
-};
-var type = vision.v1.types.Feature.Type.FACE_DETECTION;
-var featuresElement = {
-    type : type
-};
-var features = [featuresElement];
-var requestsElement = {
-    image : image,
-    features : features
-};
-var requests = [requestsElement];
-visionClient.batchAnnotateImages({requests: requests}).then(function(responses) {
-    var response = responses[0];
-    // doThingsWith(response)
-})
-.catch(function(err) {
-    console.error(err);
-});
+const getid = (req, res) =>{
+  db.find({
+    author: req.headers.auth.id
+  }).populate({path: 'author', select: 'name'})
+  .then(response => {
+    res.send(response)
+  })
+  .catch(err => {
+    res.send(err)
+  })
+}
+
+
+const insert = (req, res) =>{
+  db.create({
+    place: req.body.place,
+    date: req.body.date,
+    img: req.body.img,
+    status: false,
+    author: req.headers.auth.id
+  })
+  .then(response => {
+    res.send(response)
+  })
+  .catch(err => {
+    res.send(err)
+  })
+}
+
+const remove = (req, res) => {
+  db.remove({
+    _id: req.params.id,
+    author: req.headers.auth.id
+  })
+  .then(response => {
+    res.send(response)
+  })
+  .catch(err =>{
+    res.send(err)
+  })
+}
+
+
+
+module.exports = {
+  insert,
+  getid,
+  getall,
+  remove
+}
