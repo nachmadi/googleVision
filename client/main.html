@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Location Detection</title>
+    <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <v-app id="app" dark standalone>
+        <v-toolbar fixed dark>
+            <v-toolbar-title>Location Detection</v-toolbar-title>
+        </v-toolbar>
+        <main>
+            <v-container fluid>
+                <v-layout row wrap>
+                    <v-flex xs12 sm12 md6 lg6 xl6>
+                        <video id="video" width="600" height="480" autoplay></video>
+                        <canvas id="canvas" width="600" height="480" style="display: none;"></canvas>
+                        <v-btn @click.native="process" block secondary dark>
+                            <v-icon left>camera_alt</v-icon> Snap and Analyze</v-btn>
+
+
+                            <form id="fileform" action="">
+                          		<select name="type" id="type">
+                          			<option value="LANDMARK_DETECTION">LANDMARK_DETECTION</option>
+                          		</select><br />
+                          		<input id="fileInput" type="file" name="fileField"><br /><br />
+                          		<input type="submit" name="submit" value="Submit">
+                          	</form>
+
+
+                    </v-flex>
+                    <v-flex xs12 sm12 md6 lg6 xl6>
+
+                      <form class="ui form">
+                        <div class="field">
+                          <label>Planning your destination date</label>
+                          <br>
+                          <input type="date" v-model="newList.date" placeholder="your plan">
+                        </div>
+                        <button class="ui button" type="submit" @click='addList()'>Submit</button>
+                      </form>
+
+                        <h2 class="white--text">Result:</h2>
+                        <div class="text-xs-center" v-show="loader">
+                            <v-progress-circular indeterminate v-bind:size="100" v-bind:width="3" class="yellow--text"></v-progress-circular>
+                        </div>
+                        <div v-show="result">
+                            <div class="floated-left">
+                              <table>
+                                <tr>
+                                  <td>No</td>
+                                  <td>Kemungkinan Lokasi</td>
+                                </tr>
+                                <tr v-for="(dataLokasi, index) in guessLocation" :key="index">
+                                  <td>{{index + 1}}</td>
+                                  <td>{{dataLokasi.description}}</td>
+                                </tr>
+                              </table>
+                            </div>
+
+                            <div class="floated-left">
+                              <table>
+                                <tr>
+                                  <td>No</td>
+                                  <td>Related Article</td>
+                                </tr>
+                                <tr v-for="(data, index) in articleImage" :key="index">
+                                  <td>{{index + 1}}</td>
+                                  <td>{{data.url}}</td>
+                                </tr>
+                              </table>
+                            </div>
+
+                            <div class="floated-left">
+                              <table>
+                                <tr>
+                                  <td>Kemungkinan Lokasi</td>
+                                </tr>
+                                <tr v-for="(data, index) in similiarImage" :key="index">
+                                  <td><img :src="data.url" alt=""></td>
+                                </tr>
+                              </table>
+                            </div>
+                        </div>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </main>
+    </v-app>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+    <script src="./lib/app.js"></script>
+</body>
+
+</html>
