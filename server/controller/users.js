@@ -24,6 +24,7 @@ const login = (req, res) => {
         name: rows.name
       }
       var token = jwt.sign(siapBungkus, 'apaaa')
+      console.log('tokennya', token);
       res.send({token: token, name: rows.name})
     })
     .catch(err =>{
