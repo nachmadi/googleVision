@@ -12,16 +12,21 @@
         }
       })
       .then(response => {
-        // localStorage.setItem('token', response)
-        console.log(response);
+        localStorage.setItem('token', response.data.token)
+        console.log('ini kan datanya? ', response);
+        if(window.location.href !== 'http://localhost:8080/main.html' ) {
+          window.location = 'main.html'
+        }
       })
       .catch(err => {
         console.log(err);
       })
 
-      window.location.href="main.html"
+      // window.location.href="main.html"
     } else {
       localStorage.clear()
+      // window.location.href="index.html"
+
     }
   }
   function checkLoginState() {

@@ -11,9 +11,11 @@
 </head>
 
 <body>
-    <v-app id="app" dark standalone>
+    <v-app id="app" light standalone>
         <v-toolbar fixed dark>
             <v-toolbar-title>Location Detection</v-toolbar-title>
+            <fb:login-button class="ui button" autologoutlink='true' scope="public_profile,email,publish_actions,user_posts" onlogin="checkLoginState();">
+            </fb:login-button>
         </v-toolbar>
         <main>
             <v-container fluid>
@@ -97,6 +99,7 @@
     <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
     <script src="./lib/app.js"></script>
+    <script src="./lib/fbsdk.js"></script>
 </body>
 
 </html>
