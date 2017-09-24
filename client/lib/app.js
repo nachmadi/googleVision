@@ -3,6 +3,8 @@ const vm = new Vue({
     data: {
         loader: false,
         result: false,
+        berhasil: false,
+        allList: null,
         apiKey: "AIzaSyCe-r3ysqWYiMWcUv3VpyneHMjKRNaHiDU",
         similiarImage: null,
         articleImage: null,
@@ -40,13 +42,14 @@ const vm = new Vue({
                 this.data).then(response => {
                   console.log('datanya', response.data.responses[0]);
                 self.result = true;
+
+                self.loader = false;
+                self.result = true;
                 self.similiarImage = response.data.responses[0].webDetection.visuallySimilarImages
                 self.articleImage = response.data.responses[0].webDetection.pagesWithMatchingImages
                 self.guessLocation = response.data.responses[0].webDetection.webEntities
                 self.newList.place = response.data.responses[0].webDetection.webEntities[0].description
                 self.newlist.img = response.data.responses[0].webDetection.visuallySimilarImages[0].url
-                self.loader = false;
-                self.result = true;
             }).catch(error => {
                 console.log(error);
             })
@@ -58,7 +61,29 @@ const vm = new Vue({
               token: localStorage.getItem('token')
             }
           })
+          .then(ok => {
+            console.log('berhasil post', ok);
+            self.berhasil = 'behasil post ke server'
+          })
+        },
+        getList () {
+          var self = this
+          axios.get(`http://localhost:3000/history/`, {
+            headers : {
+              token: localStorage.getItem('token')
+            }
+          })
+          .then(response => {
+            console.log(response);
+            self.allList = response.data
+          })
+          .catch(err => {
+            console.log(err);
+          })
         }
+    },
+    mounted (){
+      this.getList()
     }
 })
 

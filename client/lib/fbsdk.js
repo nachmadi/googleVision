@@ -25,7 +25,9 @@
       // window.location.href="main.html"
     } else {
       localStorage.clear()
-      // window.location.href="index.html"
+      if(window.location.href == 'http://localhost:8080/main.html' ) {
+        window.location = 'index.html'
+      }
 
     }
   }

@@ -14,7 +14,8 @@ const getall = (req, res) =>{
 const getid = (req, res) =>{
   db.find({
     author: req.headers.auth.id
-  }).populate({path: 'author', select: 'name'})
+  })
+  .populate({path: 'author', select: 'name'})
   .then(response => {
     res.send(response)
   })
