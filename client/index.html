@@ -1,154 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Location Detection</title>
-    <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
-</head>
-
-<body>
-    <v-app id="app" dark standalone>
-        <v-toolbar fixed dark>
-            <v-toolbar-title>Location Detection</v-toolbar-title>
-        </v-toolbar>
-        <main>
-            <v-container fluid>
-                <v-layout row wrap>
-                    <v-flex xs12 sm12 md6 lg6 xl6>
-                        <video id="video" width="600" height="480" autoplay></video>
-                        <canvas id="canvas" width="600" height="480" style="display: none;"></canvas>
-                        <v-btn @click.native="process" block secondary dark>
-                            <v-icon left>camera_alt</v-icon> Snap and Analyze</v-btn>
-
-
-                            <form id="fileform" action="">
-                          		<select name="type" id="type">
-                          			<option value="LANDMARK_DETECTION">LANDMARK_DETECTION</option>
-                          		</select><br />
-                          		<input id="fileInput" type="file" name="fileField"><br /><br />
-                          		<input type="submit" name="submit" value="Submit">
-                          	</form>
-
-
-                    </v-flex>
-                    <v-flex xs12 sm12 md6 lg6 xl6>
-                        <h2 class="white--text">Result:</h2>
-                        <div class="text-xs-center" v-show="loader">
-                            <v-progress-circular indeterminate v-bind:size="100" v-bind:width="3" class="yellow--text"></v-progress-circular>
-                        </div>
-                        <div v-show="result">
-                            <div class="floated-left">
-                              <table>
-                                <tr>
-                                  <td>No</td>
-                                  <td>Kemungkinan Lokasi</td>
-                                </tr>
-                                <tr v-for="(dataLokasi, index) in guessLocation" :key="index">
-                                  <td>{{index + 1}}</td>
-                                  <td>{{dataLokasi.description}}</td>
-                                </tr>
-                              </table>
-                            </div>
-
-                            <div class="floated-left">
-                              <table>
-                                <tr>
-                                  <td>No</td>
-                                  <td>Related Article</td>
-                                </tr>
-                                <tr v-for="(data, index) in articleImage" :key="index">
-                                  <td>{{index + 1}}</td>
-                                  <td>{{data.url}}</td>
-                                </tr>
-                              </table>
-                            </div>
-
-                            <div class="floated-left">
-                              <table>
-                                <tr>
-                                  <td>Kemungkinan Lokasi</td>
-                                </tr>
-                                <tr v-for="(data, index) in similiarImage" :key="index">
-                                  <td><img :src="data.url" alt=""></td>
-                                </tr>
-                              </table>
-                            </div>
-                        </div>
-                    </v-flex>
-                </v-layout>
-            </v-container>
-        </main>
-    </v-app>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HAI</title>
+  </head>
+  <body>
+    <div class="ui grid container">
+      <!-- <button type="button" name="button" class="ui button"></button -->
+      <fb:login-button class="ui button" autologoutlink='true' scope="public_profile,email,publish_actions,user_posts" onlogin="checkLoginState();">
+      </fb:login-button>
+    </div>
+    <script src="./lib/fbsdk.js"></script>
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
-    <script>
-        const vm = new Vue({
-            el: "#app",
-            data: {
-                loader: false,
-                result: false,
-                apiKey: "AIzaSyCe-r3ysqWYiMWcUv3VpyneHMjKRNaHiDU",
-                similiarImage: null,
-                articleImage: null,
-                guessLocation: null,
-                data: {
-                    "requests": [{
-                        "features": [{
-                            "type": "WEB_DETECTION"
-                        }],
-                        "image": {
-                            "content": null
-                        }
-                    }]
-                }
-            },
-            methods: {
-                process() {
-                    const self = this;
-                    this.result = false;
-                    this.loader = true;
-                    context.drawImage(video, 0, 0, 640, 480);
-                    const base64 = canvas.toDataURL();
-                    // const final = base64.replace("data:image/png;base64,", "");
-                    console.log('base64 disini', base64);
-                    const final = base64.replace("data:image/png;base64,", "");
-                    console.log('finalnya', final);
-                    this.data.requests[0].image.content = final;
-                    axios.post(
-                        `https://vision.googleapis.com/v1/images:annotate?key=${this.apiKey}`,
-                        this.data).then(response => {
-                          console.log('datanya', response.data.responses[0]);
-                        self.result = true;
-                        self.similiarImage = response.data.responses[0].webDetection.visuallySimilarImages
-                        self.articleImage = response.data.responses[0].webDetection.pagesWithMatchingImages
-                        self.guessLocation = response.data.responses[0].webDetection.webEntities
-                        self.loader = false;
-                        self.result = true;
-                    }).catch(error => {
-                        console.log(error);
-                    })
-                }
-            }
-        })
-
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const video = document.getElementById('video');
-
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({
-                video: true
-            }).then(stream => {
-                video.src = window.URL.createObjectURL(stream);
-                // video.play();
-            });
-        }
-    </script>
-</body>
-
+  </body>
 </html>

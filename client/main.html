@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.js" charset="utf-8"></script>
+    <title>Location Detection</title>
+    <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+    <script src="https://code.jquery.com/jquery-git.min.js" charset="utf-8"></script>
+
+</head>
+
+<body>
+    <v-app id="app" light standalone>
+        <v-toolbar fixed dark>
+            <v-toolbar-title>Location Detection</v-toolbar-title>
+            <fb:login-button class="ui button" autologoutlink='true' scope="public_profile,email,publish_actions,user_posts" onlogin="checkLoginState();">
+            </fb:login-button>
+        </v-toolbar>
+        <main>
+            <v-container fluid>
+                <v-layout row wrap>
+                    <v-flex xs12 sm12 md6 lg6 xl6>
+                        <video id="video" width="600" height="480" autoplay></video>
+                        <canvas id="canvas" width="600" height="480" style="display: none;"></canvas>
+                        <v-btn @click.native="process" block secondary dark>
+                            <v-icon left>camera_alt</v-icon> Snap and Analyze</v-btn>
+
+
+                            <!-- <form id="fileform" action="">
+                          		<select name="type" id="type">
+                          			<option value="LANDMARK_DETECTION">LANDMARK_DETECTION</option>
+                          		</select><br />
+                          		<input id="fileInput" type="file" name="fileField"><br /><br />
+                          		<input type="submit" name="submit" value="Submit">
+                          	</form> -->
+
+
+                    </v-flex>
+                    <v-flex xs12 sm12 md6 lg6 xl6>
+
+                      <form class="ui form">
+                        <div class="field">
+                          <label>Planning your destination date</label>
+                          <br>
+                          <input type="date" v-model="newList.date" placeholder="your plan">
+                        </div>
+                        <button class="ui button" type="submit" @click='addList()'>Submit</button>
+                      </form>
+
+                        <h2 class="white--text">Result:</h2>
+                        <div class="text-xs-center" v-show="loader">
+                            <v-progress-circular indeterminate v-bind:size="100" v-bind:width="3" class="yellow--text"></v-progress-circular>
+                        </div>
+                        <div v-show="result">
+                            <div class="floated-left">
+                              <table border="1">
+                                <tr>
+                                  <td>No</td>
+                                  <td>Kemungkinan Lokasi</td>
+                                </tr>
+                                <tr v-for="(dataLokasi, index) in guessLocation" :key="index">
+                                  <td>{{index + 1}}</td>
+                                  <td>{{dataLokasi.description}}</td>
+                                </tr>
+                              </table>
+                            </div>
+
+                            <div class="floated-left">
+                              <table border="1">
+                                <tr>
+                                  <td>No</td>
+                                  <td>Related Article</td>
+                                </tr>
+                                <tr v-for="(data, index) in articleImage" :key="index">
+                                  <td>{{index + 1}}</td>
+                                  <td><a :href="data.url" target="_blank">{{data.url}}</a></td>
+                                </tr>
+                              </table>
+                            </div>
+
+                            <!-- <div class="floated-left">
+                              <table>
+                                <tr>
+                                  <td>Kemungkinan Lokasi</td>
+                                </tr>
+                                <tr v-for="(data, index) in similiarImage" :key="index">
+                                  <td><img :src="data.url" alt=""></td>
+                                </tr>
+                              </table>
+                            </div> -->
+                        </div>
+                    </v-flex>
+                </v-layout>
+                <br><br>
+
+                <div class="ui grid">
+                   <div class="ui small images" v-for="(data, index) in similiarImage" :key="index">
+                       <img class="preview" :src="data.url">
+                   </div>
+
+                 </div>
+
+                <div class="ui fullscreen modal">
+                   <i class="close icon"></i>
+                   <div class="header">
+                     Caption picture
+                   </div>
+                   <div class="image content">
+                     <div class="ui medium image">
+                       <img id="changeMe" src="">
+                     </div>
+                     <div class="description">
+                       <div class="ui header">
+                         header picture
+                       </div>
+                       We've auto-chosen a profile image for you.
+                         <p>We've grabbed the following image from the <a href="https://www.gravatar.com" target="_blank">gravatar</a> image associated with your registered e-mail address.</p>
+                         <p>Is it okay to use this photo?</p>
+                     </div>
+                   </div>
+                 </div>
+
+                <div class="ui container">
+                  <!-- {{allList}} -->
+                  <table border="1">
+                    <tr>
+                      <td>No</td>
+                      <td>Place</td>
+                      <td>Date to Visit</td>
+                      <td>Photo</td>
+                      <td>Option</td>
+                    </tr>
+                    <tr  v-for="(data, index) in allList" :key="index">
+                      <td>{{ index + 1 }}</td>
+                      <td>{{ data.place }}</td>
+                      <td>{{ data.date }}</td>
+                      <td>{{ data.img }}</td>
+                      <td></td>
+                    </tr>
+                  </table>
+                </div>
+
+            </v-container>
+        </main>
+    </v-app>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('.preview').click(function(event){
+          event.preventDefault();
+          $('#changeMe').prop('src', this.src);
+          $('.ui.modal').show();
+        });
+
+       $('.close.icon').click(function(event){
+          event.preventDefault();
+          $('.ui.modal').hide();
+        });
+      });
+   </script>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetify/dist/vuetify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+    <script src="./lib/app.js"></script>
+    <script src="./lib/fbsdk.js"></script>
+</body>
+
+</html>

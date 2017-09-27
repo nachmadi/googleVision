@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 const historySchema = new mongoose.Schema({
-  tempat: String,
-  tanggal: String,
+  place: String,
+  date: String,
   img: String,
   status: false,
   author: {
